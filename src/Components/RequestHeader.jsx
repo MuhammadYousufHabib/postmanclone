@@ -2,7 +2,7 @@ import React from 'react';
 
 const RequestHeader = ({ headers, handleHeaderChange, addHeader, deleteHeader }) => {
   return (
-    <div className="mb-2">
+    <div >
       <h3 className="font-semibold mb-1 text-sm">Headers</h3>
       {headers.map((header, index) => (
         <div key={index} className="flex items-center space-x-2 mb-1">

@@ -9,7 +9,7 @@ function App() {
     <BrowserRouter>
       <div className="flex h-screen text">
         <Sidebar setrequestname={setrequestname}/>
-        <div className="flex-1 p-7 m-0 bg-gray-100 h-max text-sm">
+        <div className="flex-1 p-7 m-0  text-sm">
           <Routes>
             <Route path="/" element={<h2 className='text-center'>Welcome to the App</h2>} />
             <Route path="/collection/:collectionId/request/:requestId" element={<RequestPage setrequestname={setrequestname} requestname={requestname}/>} />

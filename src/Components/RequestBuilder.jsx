@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Requestbody from './Requestbody';
 import Requestparams from './Requestparams';
 import ResponseViewer from './ResponseViewer';
+import RequestHeader from './RequestHeader';
 function RequestBuilder({ requestname, collectionId, requestId }) {
   
   const [method, setMethod] = useState('GET');
@@ -51,18 +52,8 @@ function RequestBuilder({ requestname, collectionId, requestId }) {
           });
           setParams(queryParams);
         }
-        //  if(req.responses.length>0){
-        //   const savedResponse = await fetch(`http://localhost:8000/response/${req.responses[req.responses.length-1].id}`);
-        //   if (!savedResponse.ok) {
-        //     console.log("getting reponse successful","***********")
-        //     throw new Error('Error fetching saved response*******************');
-        //   }
-        //   const savedData = await savedResponse.json();
-        //   setResponse(savedData);
-        // }
-          // setResponse(null)
+
           try {
-            // Check if request.responses exists and has at least one response
             if (request.responses.length>0) {
               const requestResponse = await fetch(`http://localhost:8000/response/${request.responses[0].id}`);
               
@@ -207,11 +198,19 @@ const viewResponse = async () => {
         console.error('Error parsing body JSON:', error);
       }
     }
+ 
+    const headersObj = headers.reduce((acc, header) => {
+      if (header.key) {
+        acc[header.key] = header.value;
+      }
+      return acc;
+    }, {});
 
     const requestBody = {
       method: method,
       url: url,
-      data: parsedBody 
+      data: parsedBody,
+      headers: headersObj,
     };
 
     const response = await fetch("http://localhost:8000/process_request/", {
@@ -237,54 +236,48 @@ const viewResponse = async () => {
 
   
   
-  const handleParamChange = (index, field, value) => {
-    const updatedParams = [...params];
-    updatedParams[index][field] = value;
-    setParams(updatedParams);
-  };
+const handleParamChange = (index, field, value) => {
+  const updatedParams = [...params];
+  updatedParams[index][field] = value;
+  setParams(updatedParams);
+
+  const queryString = updatedParams
+    .filter(param => param.key) 
+    .map(param => {
+      const encodedKey = encodeURIComponent(param.key);
+      const encodedValue = param.value ? `=${encodeURIComponent(param.value)}` : '';
+      return `${encodedKey}${encodedValue}`;
+    })
+    .join('&');
+
+  const baseUrl = url.split('?')[0]; 
+  setUrl(queryString ? `${baseUrl}?${queryString}` : baseUrl); 
+};
+
+
+
 
   const addParam = () => {
     setParams([...params, { key: '', value: '' }]);
   };
-  const deleteParam = async (index) => {
-    // try {
-    //   // Delete the parameter
-    //   const response = await fetch(`http://localhost:8000/parameter/${thisreq.id}`, {
-    //     method: 'DELETE',
-    //   });
+  const deleteParam = (index) => {
+    const updatedParams = params.filter((_, i) => i !== index);
+    setParams(updatedParams);
   
-    //   if (!response.ok) {
-    //     throw new Error('Network response was not ok');
-    //   }
-    //   await response.json(); // Optionally process the response
+    const queryString = updatedParams
+      .filter(param => param.key) 
+      .map(param => {
+        const encodedKey = encodeURIComponent(param.key);
+        const encodedValue = param.value ? `=${encodeURIComponent(param.value)}` : '';
+        return `${encodedKey}${encodedValue}`;
+      })
+      .join('&');
   
-    //   // Update parameters
-    //   const paramPayload = {
-    //     request_id: Number(requestId),
-    //     query_param: params.map(param => `${param.key}:${param.value}`).join(','),
-    //     body: thisreq.body,
-    //   };
-  
-    //   const paramResponse = await fetch('http://localhost:8000/parameter/', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify(paramPayload),
-    //   });
-  
-    //   if (!paramResponse.ok) {
-    //     throw new Error(`Param API error! status: ${paramResponse.status}`);
-    //   }
-  
-    //   // Update state with the filtered parameters
-      const updatedParams = params.filter((_, i) => i !== index);
-      setParams(updatedParams);
-  
-    // } catch (error) {
-    //   console.error('Error making request:', error);
-    // }
+    const baseUrl = url.split('?')[0]; 
+    setUrl(queryString ? `${baseUrl}?${queryString}` : baseUrl); 
   };
+  
+  
   
   const handleHeaderChange = (index, field, value) => {
     const updatedHeaders = [...headers];
@@ -340,13 +333,14 @@ const viewResponse = async () => {
         handleParamChange={handleParamChange} 
         addParam={addParam} 
         deleteParam={deleteParam} 
+    
       />
-      {/* <RequestHeader 
+      <RequestHeader 
         headers={headers} 
         handleHeaderChange={handleHeaderChange} 
         addHeader={addHeader} 
         deleteHeader={deleteHeader} 
-      /> */}
+      />
       <Requestbody 
         body={body} 
         setBody={setBody} 
