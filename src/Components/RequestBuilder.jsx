@@ -145,7 +145,6 @@ function RequestBuilder({ requestname, collectionId, requestId }) {
       response_size: data?.response_size || '', 
     };
     if(req.responses.length>0){
-    // Post the response to your API
     const postResponsed = await fetch(`http://localhost:8000/response/${req.responses[0].id}`, {
       method: "PATCH",
       headers: {
@@ -198,12 +197,18 @@ const viewResponse = async () => {
         console.error('Error parsing body JSON:', error);
       }
     }
-
-
+ 
+    const headersObj = headers.reduce((acc, header) => {
+      if (header.key) {
+        acc[header.key] = header.value;
+      }
+      return acc;
+    }, {});
     const requestBody = {
       method: method,
       url: url,
       data: parsedBody,
+      headers: headersObj,
     };
 
     const response = await fetch("http://localhost:8000/process_request/", {
