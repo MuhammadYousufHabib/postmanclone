@@ -4,7 +4,7 @@ import Requestparams from './Requestparams';
 import ResponseViewer from './ResponseViewer';
 import RequestHeader from './RequestHeader';
 function RequestBuilder({ requestname, collectionId, requestId }) {
-  
+  //nocomment
   const [method, setMethod] = useState('GET');
   const [req, setreq] = useState(null);
   const [url, setUrl] = useState('');
@@ -154,7 +154,7 @@ function RequestBuilder({ requestname, collectionId, requestId }) {
     });
 
     if (!postResponsed.ok) {
-      throw new Error(`Error posting response! status: ${postResponsed.status}`);
+      console.log(`Error postingg response! status: ${postResponsed.status}`);
     }
   
   }
@@ -180,7 +180,7 @@ function RequestBuilder({ requestname, collectionId, requestId }) {
         setreq(request);
 
     if (!postResponsed.ok) {
-      throw new Error(`Error posting response! status: ${postResponsed.status}`);
+     console.log(`Error posting response! status: ${postResponsed.status}`);
     }
   
   }

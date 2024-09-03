@@ -43,7 +43,7 @@ function ResponseViewer({ response }) {
               </div>
               {!isLegacyFormat && (
                 <div className="mr-4">
-                  <strong>Cookies:</strong> {cookies}
+                  {/* <strong>Cookies:</strong> {cookies} */}
                 </div>
               )}
             </div>
