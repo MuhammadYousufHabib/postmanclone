@@ -1,24 +1,23 @@
-import logo from './logo.svg';
-import './App.css';
-
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Sidebar from './Components/Sidebar';
+import RequestPage from './Components/RequestPage'; // Import the new component
+import DescriptionPage from './Components/DescriptionPage'; // Create this component
+import { useState } from 'react';
 function App() {
+  const [requestname, setrequestname] = useState("") 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <div className="flex h-screen text">
+        <Sidebar setrequestname={setrequestname}/>
+        <div className="flex-1 p-7 m-0 bg-gray-100 h-max text-sm">
+          <Routes>
+            <Route path="/" element={<h2 className='text-center'>Welcome to the App</h2>} />
+            <Route path="/collection/:collectionId/request/:requestId" element={<RequestPage setrequestname={setrequestname} requestname={requestname}/>} />
+            <Route path="/collection/:id/description" element={<DescriptionPage />} />
+          </Routes>
+        </div>
+      </div>
+    </BrowserRouter>
   );
 }
 
