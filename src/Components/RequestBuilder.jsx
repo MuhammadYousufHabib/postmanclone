@@ -198,19 +198,12 @@ const viewResponse = async () => {
         console.error('Error parsing body JSON:', error);
       }
     }
- 
-    const headersObj = headers.reduce((acc, header) => {
-      if (header.key) {
-        acc[header.key] = header.value;
-      }
-      return acc;
-    }, {});
+
 
     const requestBody = {
       method: method,
       url: url,
       data: parsedBody,
-      headers: headersObj,
     };
 
     const response = await fetch("http://localhost:8000/process_request/", {
