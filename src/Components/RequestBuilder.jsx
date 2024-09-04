@@ -35,6 +35,14 @@ return request}
         const data = await response.json();
         setUrl(data.url);
         setMethod(data.method);
+        const Currentrequest=await getCurrentRequest()
+        getParam(Currentrequest)
+        let size = Number(Currentrequest.params.length-1)
+        let prm = Currentrequest.params[size].query_param
+        let [key, value] = prm.split(":");
+        let new_url = data.url+`?${key}=${value}`
+
+        if(Currentrequest.params[size].query_param!=":"){setUrl(new_url)}
   
   }
 const getParam = (request) => {
