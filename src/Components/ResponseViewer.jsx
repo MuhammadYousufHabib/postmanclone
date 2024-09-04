@@ -2,7 +2,7 @@ import React from 'react';
 
 function ResponseViewer({ response }) {
   if (response===null) {
-    return <div className="p-4 text-center text-gray-600">No response available.</div>;
+    return <><p className='font-bold text-lg p-2'>Response Details</p><div className="p-4 text-center text-gray-600 mt-[10%]">No response available.</div>;</>
   }
 
   const isLegacyFormat = !response.hasOwnProperty('json') && !response.hasOwnProperty('headers');
@@ -26,12 +26,12 @@ function ResponseViewer({ response }) {
     : 'N/A';
 
   return (
-    <div className="flex-1 p-4 max-w-screen-lg ">
+    <div className="flex-1 p-1 ">
       <h3 className="text-lg font-bold m-1 text-black-600">Response Details</h3>
-      <div className="bg-gray-100 p-4 border rounded shadow-lg max-h-screen overflow-y-auto">
+      <div className="bg-gray-100 p-2 border rounded shadow-lg max-h-screen overflow-y-auto w-[1070px] h-60">
         {response ? (
           <>
-            <div className="flex flex-wrap mb-4 text-sm text-gray-700">
+            <div className="flex flex-wrap mb-2 text-sm text-gray-700">
               <div className="mr-4">
                 <strong>Status Code:</strong> {response.status_code ?? 'N/A'}
               </div>

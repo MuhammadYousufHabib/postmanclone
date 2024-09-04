@@ -7,36 +7,51 @@ function Sidebar({setrequestname}) {
   const navigate = useNavigate();const dropdownRef = useRef(null);
   const [collections, setCollections] = useState([]);
   const [newCollection, setNewCollection] = useState('');
-  const [newDescription, setNewDescription] = useState('');
+  const [Description, setDescription] = useState('');
   const [dropDownOpen, setDropDownOpen] = useState(null);
   const [loading, setLoading] = useState(true); 
   const [error, setError] = useState(null);
- const handleCloseDropDown = () => {
-  setDropDownOpen(null);
+
+const handleInputChange = (e) => {
+  setNewCollection(e.target.value);
 };
 
-  useEffect(() => { 
-    const fetchCollections = async () => {
-      try {
-        const response = await fetch('http://127.0.0.1:8000');
-        if (!response.ok) {
-          throw new Error('Failed to fetch collections');
-        }
-        const data = await response.json();
-        setCollections(data.map(collection => ({
-          ...collection,
-          requests: collection.requests || [], 
-        })));
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+const handleDescriptionChange = (e) => {
+  setDescription(e.target.value);
+};
 
+const handleKeyPress = (e) => {
+  if (e.key === 'Enter') {
+    handleCreateCollection();
+  }
+};
+const handleCloseDropDown = () => {
+  setDropDownOpen(null);
+};
+const handleDropDownToggle = (index) => {
+  setDropDownOpen(dropDownOpen === index ? null : index);
+};
+
+const fetchCollections = async () => {
+  try {
+    const response = await fetch('http://127.0.0.1:8000');
+    if (!response.ok) {
+      throw new Error('Failed to fetch collections');
+    }
+    const data = await response.json();
+    setCollections(data.map(collection => ({
+      ...collection,
+      requests: collection.requests || [], 
+    })));
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+  useEffect(() => { 
     fetchCollections();
   }, []);
-
   const handleCreateCollection = async () => {
     if (newCollection !== '') {
       try {
@@ -47,71 +62,27 @@ function Sidebar({setrequestname}) {
           },
           body: JSON.stringify({
             name: newCollection,
-            description: newDescription,
+            description: Description,
             requests: [] 
           }),
         });
-
+  
         if (!response.ok) {
           throw new Error('Failed to create collection');
         }
-
+  
         const newCollectionData = await response.json();
         setCollections([...collections, {
           ...newCollectionData,
           requests: [], 
         }]);
         setNewCollection('');
-        setNewDescription('');
+        setDescription('');
       } catch (err) {
         setError(err.message);
       }
     }
   };
-
-  const handleInputChange = (e) => {
-    setNewCollection(e.target.value);
-  };
-
-  const handleDescriptionChange = (e) => {
-    setNewDescription(e.target.value);
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleCreateCollection();
-    }
-  };
-
-  const handleDropDownToggle = (index) => {
-    setDropDownOpen(dropDownOpen === index ? null : index);
-  };
-  const handleDeleteRequest = async (collectionIndex, requestId) => {
-    try {
-      const response = await fetch(`http://127.0.0.1:8000/request/${requestId}`, {
-        method: 'DELETE',
-      });
-  
-      if (!response.ok) {
-        throw new Error('Failed to delete request');
-      }
-  
-      const updatedCollections = collections.map((collection, idx) => {
-        if (idx === collectionIndex) {
-          return {
-            ...collection,
-            requests: collection.requests.filter(request => request.id !== requestId)
-          };
-        }
-        return collection;
-      });
-  
-      setCollections(updatedCollections);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-  
   const handleAddRequest = async (collectionIndex) => {
     const requestName = prompt('Enter request name:');
     const name = requestName || 'Untitled Request';
@@ -151,11 +122,33 @@ function Sidebar({setrequestname}) {
       setError(err.message);
     }
   };
+const handleDeleteRequest = async (collectionIndex, requestId) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/request/${requestId}`, {
+        method: 'DELETE',
+      });
   
+      if (!response.ok) {
+        throw new Error('Failed to delete request');
+      }
   
-
+      const updatedCollections = collections.map((collection, idx) => {
+        if (idx === collectionIndex) {
+          return {
+            ...collection,
+            requests: collection.requests.filter(request => request.id !== requestId)
+          };
+        }
+        return collection;
+      });
+  
+      setCollections(updatedCollections);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+  
   const handleViewDescription = (collection) => {
-    // Navigate to a new route with the collection ID
     navigate(`/collection/${collection.id}/description`);
   };
 
@@ -180,8 +173,7 @@ function Sidebar({setrequestname}) {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 p-4 space-y-2 text-xs">
-      <p className="text-lg">Collections</p>
+    <div className="w-64 bg-white border-r border-gray-200 p-4 space-y-2 text-xs mt-3">
       <div>
         <input
           type="text"
@@ -195,7 +187,7 @@ function Sidebar({setrequestname}) {
           type="text"
           className="bg-white text-sm p-1 border border-gray-300 rounded w-full my-2"
           placeholder="Enter collection description"
-          value={newDescription}
+          value={Description}
           onChange={handleDescriptionChange}
           onKeyDown={handleKeyPress}
         />
