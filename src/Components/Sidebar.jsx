@@ -1,183 +1,82 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import DropDown from './DropDown';
 import { useNavigate } from 'react-router-dom';
-
-function Sidebar({setrequestname}) {
-  const navigate = useNavigate();const dropdownRef = useRef(null);
-  const [collections, setCollections] = useState([]);
+import { useCollections } from '../hooks/useCollection';
+//nocomment
+function Sidebar({ setrequestname }) {
+  const navigate = useNavigate();
   const [newCollection, setNewCollection] = useState('');
   const [Description, setDescription] = useState('');
   const [dropDownOpen, setDropDownOpen] = useState(null);
-  const [loading, setLoading] = useState(true); 
-  const [error, setError] = useState(null);
 
-const handleInputChange = (e) => {
-  setNewCollection(e.target.value);
-};
+  const { 
+    collections, 
+    loading, 
+    error, 
+    createNewCollection, 
+    addNewRequest, 
+    removeRequest, 
+    removeCollection 
+  } = useCollections();
 
-const handleDescriptionChange = (e) => {
-  setDescription(e.target.value);
-};
+  const handleInputChange = (e) => {
+    setNewCollection(e.target.value);
+  };
 
-const handleKeyPress = (e) => {
-  if (e.key === 'Enter') {
-    handleCreateCollection();
-  }
-};
-const handleCloseDropDown = () => {
-  setDropDownOpen(null);
-};
-const handleDropDownToggle = (index) => {
-  setDropDownOpen(dropDownOpen === index ? null : index);
-};
+  const handleDescriptionChange = (e) => {
+    setDescription(e.target.value);
+  };
 
-const fetchCollections = async () => {
-  try {
-    const response = await fetch('http://127.0.0.1:8000');
-    if (!response.ok) {
-      throw new Error('Failed to fetch collections');
-    }
-    const data = await response.json();
-    setCollections(data.map(collection => ({
-      ...collection,
-      requests: collection.requests || [], 
-    })));
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
-  useEffect(() => { 
-    fetchCollections();
-  }, []);
-  const handleCreateCollection = async () => {
-    if (newCollection !== '') {
-      try {
-        const response = await fetch('http://127.0.0.1:8000/collection/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name: newCollection,
-            description: Description,
-            requests: [] 
-          }),
-        });
-  
-        if (!response.ok) {
-          throw new Error('Failed to create collection');
-        }
-  
-        const newCollectionData = await response.json();
-        setCollections([...collections, {
-          ...newCollectionData,
-          requests: [], 
-        }]);
-        setNewCollection('');
-        setDescription('');
-      } catch (err) {
-        setError(err.message);
-      }
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleCreateCollection();
     }
   };
-  const handleAddRequest = async (collectionIndex) => {
-    const requestName = prompt('Enter request name:');
-    const name = requestName || 'Untitled Request';
-    try {
-      const response = await fetch('http://127.0.0.1:8000/request/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          collection_id: collections[collectionIndex].id,
-          name: name,
-          method: 'GET', 
-          url: ''     
-        }),
-      });
-  
-      if (!response.ok) {
-        throw new Error('Failed to create request');
-      }
-  
-      const newRequestData = await response.json();
-  
-      const updatedCollections = collections.map((collection, idx) => {
-        if (idx === collectionIndex) {
-          return {
-            ...collection,
-            requests: [...collection.requests, newRequestData] 
-          };
-        }
-        return collection;
-      });
-  
-      setCollections(updatedCollections);
-      setDropDownOpen(null);
-    } catch (err) {
-      setError(err.message);
+
+  const handleCloseDropDown = () => {
+    setDropDownOpen(null);
+  };
+
+  const handleDropDownToggle = (index) => {
+    setDropDownOpen(dropDownOpen === index ? null : index);
+  };
+
+  const handleCreateCollection = () => {
+    if (newCollection) {
+      createNewCollection(newCollection, Description);
+      setNewCollection('');
+      setDescription('');
     }
   };
-const handleDeleteRequest = async (collectionIndex, requestId) => {
-    try {
-      const response = await fetch(`http://127.0.0.1:8000/request/${requestId}`, {
-        method: 'DELETE',
-      });
-  
-      if (!response.ok) {
-        throw new Error('Failed to delete request');
-      }
-  
-      const updatedCollections = collections.map((collection, idx) => {
-        if (idx === collectionIndex) {
-          return {
-            ...collection,
-            requests: collection.requests.filter(request => request.id !== requestId)
-          };
-        }
-        return collection;
-      });
-  
-      setCollections(updatedCollections);
-    } catch (err) {
-      setError(err.message);
-    }
+
+  const handleAddRequest = (collectionIndex) => {
+    const requestName = prompt('Enter request name:') || 'Untitled Request';
+    addNewRequest(collectionIndex, requestName);
+    setDropDownOpen(null);
   };
-  
+
+  const handleDeleteRequest = (collectionIndex, requestId) => {
+    removeRequest(collectionIndex, requestId);
+  };
+
   const handleViewDescription = (collection) => {
     navigate(`/collection/${collection.id}/description`);
   };
 
-  const handleDeleteCollection = async (collectionId) => {
-    try {
-      const response = await fetch(`http://127.0.0.1:8000/collection/${collectionId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete collection');
-      }
-
-      const newCollections = collections.filter(collection => collection.id !== collectionId);
-      setCollections(newCollections);
-    } catch (err) {
-      setError(err.message);
-    }
+  const handleDeleteCollection = (collectionId) => {
+    removeCollection(collectionId);
   };
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 p-4 space-y-2 text-xs mt-3">
-      <div>
+    <div className="max-w-56 min-w-56 bg-gray-50 border-r border-gray-300 p-2 space-y-4 text-xs mt-3 h-[98%] overflow-y-auto shadow-lg rounded-lg">
+      <div className="space-y-3">
         <input
           type="text"
-          className="bg-white text-sm p-1 border border-gray-300 rounded w-full"
+          className="bg-white text-sm p-2 border border-gray-300 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Enter collection name"
           value={newCollection}
           onChange={handleInputChange}
@@ -185,56 +84,56 @@ const handleDeleteRequest = async (collectionIndex, requestId) => {
         />
         <input
           type="text"
-          className="bg-white text-sm p-1 border border-gray-300 rounded w-full my-2"
+          className="bg-white text-sm p-2 border border-gray-300 rounded-lg w-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Enter collection description"
           value={Description}
           onChange={handleDescriptionChange}
           onKeyDown={handleKeyPress}
         />
         <button
-          className="mt-2 px-3 py-1 bg-blue-500 text-white rounded w-full hover:bg-blue-600 mb-3"
+          className="mt-2 px-4 py-2 bg-gradient-to-r from-blue-400 to-blue-600 text-white font-semibold rounded-lg w-full shadow-md hover:bg-blue-700 transition-colors duration-300"
           onClick={handleCreateCollection}
         >
           + Create New Collection
         </button>
       </div>
-      <ul className="space-y-2">
+
+      <ul className="space-y-3">
         {collections.map((collection, index) => (
-          <li key={collection.id} className="bg-gray-100 p-1 rounded cursor-pointer text-xs flex flex-col relative h- border border-gray-300">
-            <div className="flex justify-between items-center text-xs">
-              {collection.name}
+          <li key={collection.id} className="bg-white p-2 rounded-lg shadow-md border border-gray-300">
+            <div className="flex justify-between items-center text-sm font-medium">
+              <span className="truncate text-gray-700">{collection.name}</span>
               <button
-                className="text-sm h-4"
+                className="text-gray-500 hover:text-blue-600 transition-colors duration-200"
                 onClick={() => handleDropDownToggle(index)}
               >
                 ⮟
               </button>
               <DropDown
-  ref={dropdownRef} 
-  isOpen={dropDownOpen === index}
-  onAddRequest={() => handleAddRequest(index)}
-  onViewDescription={() => handleViewDescription(collection)}
-  onDeleteCollection={() => handleDeleteCollection(collection.id)}
-  onClose={handleCloseDropDown} 
-  
-/>
+                isOpen={dropDownOpen === index}
+                onAddRequest={() => handleAddRequest(index)}
+                onViewDescription={() => handleViewDescription(collection)}
+                onDeleteCollection={() => handleDeleteCollection(collection.id)}
+                onClose={handleCloseDropDown}
+              />
             </div>
             {collection.requests.length > 0 && (
-              <ul className="ml-4 mt-2 space-y-1 ">
-                {collection.requests.map((request, reqIndex) => (
-                  <li key={request.id} className="bg-gray-200 p-1 border border-gray-400 text-xs flex justify-between">
-                  <Link
-  to={`/collection/${collection.id}/request/${request.id}`}
-  onClick={() => setrequestname(request.name)}
->
-  {request.name}
-</Link> 
+              <ul className="ml-4 mt-2 space-y-2">
+                {collection.requests.map((request) => (
+                  <li key={request.id} className="flex justify-between bg-gray-50 p-2 rounded-lg shadow-sm border border-gray-300 text-xs items-center">
+                    <Link
+                      to={`/collection/${collection.id}/request/${request.id}`}
+                      onClick={() => setrequestname(request.name)}
+                      className="text-blue-500 hover:underline truncate"
+                    >
+                      {request.name}
+                    </Link>
                     <button
-          onClick={() => handleDeleteRequest(index, request.id)}
-          className="text-red-500 ml-2 hover:text-red-700 "
-        >
-        ✕
-        </button>
+                      onClick={() => handleDeleteRequest(index, request.id)}
+                      className="text-red-500 hover:text-red-700 transition-colors duration-200"
+                    >
+                      ✕
+                    </button>
                   </li>
                 ))}
               </ul>

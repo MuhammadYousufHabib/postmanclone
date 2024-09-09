@@ -28,12 +28,12 @@ const Requestparams = ({params,handleParamChange,addParam,deleteParam}) => {
         </button>
       </div>
     ))}
-    <button
+    {/* <button
       className="text-blue-500 hover:underline text-sm "
       onClick={addParam}
     >
       + Add param
-    </button>
+    </button> */}
   </div>
   )
 }

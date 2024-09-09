@@ -1,23 +1,26 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Sidebar from './Components/Sidebar';
-import DescriptionPage from './Components/DescriptionPage'; 
+import DescriptionPage from './pages/DescriptionPage'; 
 import { useState } from 'react';
-import RequestBuilder from './Components/RequestBuilder';
+import RequestBuilder from './pages/RequestBuilder';
+import NotFoundPage from './pages/NotFound';
 function App() {
+ const location= useLocation()
   const [requestname, setrequestname] = useState("") 
   return (
-    <BrowserRouter>
+   
       <div className="flex h-screen ">
-        <Sidebar setrequestname={setrequestname}/>
-        <div className="flex-1 p-4 m-0  text-sm">
+      {location.pathname !=='/pagenotfound' && <Sidebar setrequestname={setrequestname} />}         <div className="flex-1  m-0  text-sm">
           <Routes>
             <Route path="/" element={<h2 className='text-center mt-[25%] text-4xl'>Welcome to Postman</h2>} />
             <Route path="/collection/:collectionId/request/:requestId" element={<RequestBuilder  requestname={requestname}/>} />
             <Route path="/collection/:id/description" element={<DescriptionPage />} />
+            <Route path="/pagenotfound" element={<NotFoundPage />} />
+            
           </Routes>
         </div>
       </div>
-    </BrowserRouter>
+
   );
 }
 

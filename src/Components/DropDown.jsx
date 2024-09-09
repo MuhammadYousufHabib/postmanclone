@@ -22,7 +22,7 @@ function DropDown({ isOpen, onAddRequest, onViewDescription, onDeleteCollection,
   return (
     <ul 
       ref={dropdownRef} 
-      className="text-xs absolute right-0 mt-20 w-48 bg-white border border-gray-200 rounded shadow-md z-10"
+      className="text-xs absolute left-48 mt-20 w-48 bg-white border border-gray-200 rounded shadow-md z-10"
     >
       <li
         onClick={() => {

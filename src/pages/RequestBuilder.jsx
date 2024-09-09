@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import Requestbody from './Requestbody';
-import Requestparams from './Requestparams';
-import ResponseViewer from './ResponseViewer';
-import RequestHeader from './RequestHeader';
-import { useParams } from 'react-router-dom';
+import Requestbody from '../Components/Requestbody';
+import Requestparams from '../Components/Requestparams';
+import ResponseViewer from '../Components/ResponseViewer';
+import RequestHeader from '../Components/RequestHeader';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 function RequestBuilder({requestname}) {
   //nocomment
+  const Navigate=useNavigate()
   const { collectionId, requestId } = useParams();
   const [method, setMethod] = useState('GET');
   const [req, setreq] = useState(null);
@@ -18,33 +19,37 @@ function RequestBuilder({requestname}) {
 const getCurrentRequest=async()=>{
   const collectionResponse = await fetch(`http://localhost:8000/`);
   if (!collectionResponse.ok) {
-    throw new Error('Network response was not ok');
-  }
-  const collectionData = await collectionResponse.json();
+    Navigate("/pagenotfound")  }
+try{  const collectionData = await collectionResponse.json();
 
   const collection = collectionData.find(col => Number(col.id) === Number(collectionId));
 
   const request = collection.requests.find(req => Number(req.id) === Number(requestId));
   setreq(request);
-return request}
+return request}catch(error){console.log("first")}}
   const getMethodandURL = async() => {
     const response = await fetch(`http://localhost:8000/request/${requestId}`);
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          Navigate("/pagenotfound")
         }
         const data = await response.json();
         setUrl(data.url);
         setMethod(data.method);
-        const Currentrequest=await getCurrentRequest()
-        getParam(Currentrequest)
+    try   { const Currentrequest=await getCurrentRequest()
+        if(Currentrequest.param)
+  {      getParam(Currentrequest)
         let size = Number(Currentrequest.params.length-1)
         let prm = Currentrequest.params[size].query_param
         let [key, value] = prm.split(":");
         let new_url = data.url+`?${key}=${value}`
 
-        if(Currentrequest.params[size].query_param!=":"){setUrl(new_url)}
-  
+        if(Currentrequest.params[size].query_param!=":"){setUrl(new_url)}}
+  } catch(error){
+    console.log(error,"its an error")
+
   }
+  }
+ 
 const getParam = (request) => {
   if (request.params.length === 0) {
     setParams([{ key: '', value: '' }]);
@@ -78,7 +83,7 @@ const getResponse = async (request)=>{
   }
 }
   useEffect(() => {
-    async function getRequestData() {
+ try {  async function getRequestData() {
      
        getMethodandURL()
 
@@ -89,8 +94,11 @@ const getResponse = async (request)=>{
          getResponse(Currentrequest)}}
          
 
-    getRequestData();
-  }, [requestId, collectionId]);
+    getRequestData();}
+    catch(error){
+      console.log(error)
+    }
+  }, [requestId]);
   
 const sendMethodandURL =async()=>{
   let apiUrl = `http://127.0.0.1:8000/request/${requestId}`;
@@ -298,7 +306,7 @@ delparamfromdb()
   };
 
  const delparamfromdb=async()=>{
-  const paramPayload = {
+ try{ const paramPayload = {
     query_param: ":", 
   };
   const Request=await getCurrentRequest()
@@ -308,7 +316,9 @@ delparamfromdb()
       "Content-Type": "application/json"
     },
     body: JSON.stringify(paramPayload),
-  });
+  });}catch(error){
+    console.log("del prm error",error)
+  }
  }
   
   
@@ -329,7 +339,7 @@ delparamfromdb()
   };
 
   return (
-    <div className="mb-4">
+    <div  className="mb-4 p-4">
       <div className="flex items-center space-x-2 mb-2">
         <input
           type="text"
@@ -345,6 +355,9 @@ delparamfromdb()
           <option value="GET">GET</option>
           <option value="POST">POST</option>
           <option value="PATCH">PATCH</option>
+          <option value="HEAD">HEAD</option>
+          <option value="PUT">PUT</option>
+          <option value="OPTIONS">OPTIONS</option>
           <option value="DELETE">DELETE</option>
         </select>
         <input
