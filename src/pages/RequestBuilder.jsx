@@ -3,7 +3,7 @@ import Requestbody from '../Components/Requestbody';
 import Requestparams from '../Components/Requestparams';
 import ResponseViewer from '../Components/ResponseViewer';
 import RequestHeader from '../Components/RequestHeader';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import {  useNavigate, useParams } from 'react-router-dom';
 function RequestBuilder({requestname}) {
   //nocomment
   const Navigate=useNavigate()
@@ -43,7 +43,7 @@ return request}catch(error){console.log("first")}}
         let [key, value] = prm.split(":");
         let new_url = data.url+`?${key}=${value}`
 
-        if(Currentrequest.params[size].query_param!=":"){setUrl(new_url)}}
+        if(Currentrequest.params[size].query_param!==":"){setUrl(new_url)}}
   } catch(error){
     console.log(error,"its an error")
 
@@ -90,7 +90,7 @@ const getResponse = async (request)=>{
           const Currentrequest=await getCurrentRequest()
         if(Currentrequest){   setreq(Currentrequest);
            getParam(Currentrequest)
-
+//
          getResponse(Currentrequest)}}
          
 
@@ -98,6 +98,7 @@ const getResponse = async (request)=>{
     catch(error){
       console.log(error)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestId]);
   
 const sendMethodandURL =async()=>{
@@ -301,25 +302,9 @@ const handleParamChange = (index, field, value) => {
     const baseUrl = url.split('?')[0]; 
     setUrl(queryString ? `${baseUrl}?${queryString}` : baseUrl); 
   
-delparamfromdb()
 //getMethodandURL()
   };
 
- const delparamfromdb=async()=>{
- try{ const paramPayload = {
-    query_param: ":", 
-  };
-  const Request=await getCurrentRequest()
-  const param_del = await fetch(`http://localhost:8000/parameter/${Request.params[Request.params.length-1].id}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(paramPayload),
-  });}catch(error){
-    console.log("del prm error",error)
-  }
- }
   
   
   

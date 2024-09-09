@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Sidebar from './Components/Sidebar';
 import DescriptionPage from './pages/DescriptionPage'; 
 import { useState } from 'react';
